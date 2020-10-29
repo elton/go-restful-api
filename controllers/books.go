@@ -27,6 +27,12 @@ type CreateBookInput struct {
 	Author string `json:"author" binding:"required`
 }
 
+// UpdateBookInput 更新图书的输入对象
+type UpdateBookInput struct {
+	Title  string `json:"title"`
+	Author string `json:"author"`
+}
+
 // FindBooks 得到所有的书籍
 func FindBooks(c *gin.Context) {
 	var books []models.Book
@@ -63,5 +69,32 @@ func CreateBook(c *gin.Context) {
 	}
 	models.DB.Create(&book)
 
+	c.JSON(http.StatusOK, gin.H{"data": book})
+}
+
+// UpdateBook 更新book数据
+// curl -X PATCH -H 'Content-Type: application/json' -d '{"title":"The Infinite Game"}' http://localhost:8080/books/1
+func UpdateBook(c *gin.Context) {
+	// 得到一个图书的模型
+	var book models.Book
+	if err := models.DB.Where("id=?", c.Param("id")).First(&book).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		return
+	}
+
+	// 验证输入
+	var input UpdateBookInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 创建待更新的图书
+	newBook := models.Book{
+		Title:  input.Title,
+		Author: input.Author,
+	}
+
+	models.DB.Model(&book).Updates(&newBook)
 	c.JSON(http.StatusOK, gin.H{"data": book})
 }
