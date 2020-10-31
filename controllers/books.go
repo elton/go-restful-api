@@ -34,6 +34,7 @@ type UpdateBookInput struct {
 }
 
 // FindBooks 得到所有的书籍
+// curl http://localhost:8080/books
 func FindBooks(c *gin.Context) {
 	var books []models.Book
 	models.DB.Find(&books)
@@ -42,6 +43,7 @@ func FindBooks(c *gin.Context) {
 }
 
 // FindBook 根据ID获取对应的图书
+// curl http://localhost:8080/books/1
 func FindBook(c *gin.Context) {
 	var book models.Book
 
@@ -54,6 +56,7 @@ func FindBook(c *gin.Context) {
 }
 
 // CreateBook 创建图书
+// curl -X POST -H 'Content-Type: application/json' -d '{"author":"Simon Sinek", "title":"Start with Why"}' http://localhost:8080/books
 func CreateBook(c *gin.Context) {
 	// 验证输入
 	var input CreateBookInput
@@ -97,4 +100,18 @@ func UpdateBook(c *gin.Context) {
 
 	models.DB.Model(&book).Updates(&newBook)
 	c.JSON(http.StatusOK, gin.H{"data": book})
+}
+
+// DeleteBook 删除一本书
+// curl -X DELETE http://localhost:8080/books/1
+func DeleteBook(c *gin.Context) {
+	// 得到一个书的
+	var book models.Book
+	if err := models.DB.Where("id=?", c.Param("id")).First(&book).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+		return
+	}
+
+	models.DB.Delete(&book)
+	c.JSON(http.StatusOK, gin.H{"data": true})
 }

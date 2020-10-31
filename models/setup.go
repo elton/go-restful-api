@@ -51,13 +51,13 @@ func ConnectDatabase() {
 	// 连接数设置
 	sqlDB, _ := database.DB()
 	// SetMaxIdleConns 用于设置连接池中空闲连接的最大数量。
-	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxIdleConns(64)
 	// SetMaxOpenConns 设置打开数据库连接的最大数量。
-	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetMaxOpenConns(64)
 	// SetConnMaxLifetime 设置了连接可复用的最大时间。
-	sqlDB.SetConnMaxLifetime(time.Hour)
+	sqlDB.SetConnMaxLifetime(time.Minute)
 
-	sqlDB.Ping()
+	// sqlDB.Ping()
 
 	database.AutoMigrate(&Book{})
 
